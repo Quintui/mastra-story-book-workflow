@@ -165,12 +165,10 @@ const gatherStoryStep = createStep({
   outputSchema: storyResultSchema,
   stateSchema: workflowStateSchema,
   execute: async ({ inputData, state }) => {
-    // Sort chapters by chapter number to ensure correct order
     const sortedChapters = [...inputData].sort(
       (a, b) => a.chapterNumber - b.chapterNumber,
     );
 
-    // Get storyTitle from workflow state
     const { storyTitle } = state;
 
     return {
@@ -181,7 +179,6 @@ const gatherStoryStep = createStep({
   },
 });
 
-// Main story generation workflow
 export const storyWorkflow = createWorkflow({
   id: "story-generation-workflow",
   description:

@@ -1,22 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StoryInput } from "@/src/components/story-input";
 import { StoryOutline } from "@/src/components/story-outline";
 import { StoryBook } from "@/src/components/story-book";
 import { AnimatePresence, motion } from "motion/react";
 import { useStoryWorkflow } from "../hooks/use-story-workflow";
-
-export type ChapterOutline = {
-  chapterNumber: number;
-  title: string;
-  premise: string;
-  characters: string[];
-  setting: string;
-  emotionalTone: string;
-  keyEvents: string[];
-  storyConnection: string;
-};
 
 type AppState = "input" | "outlining" | "book";
 
@@ -24,59 +13,50 @@ export default function Home() {
   const [appState, setAppState] = useState<AppState>("input");
   const [storyPrompt, setStoryPrompt] = useState("");
   const [chapterCount, setChapterCount] = useState(5);
-  const [outline, setOutline] = useState<ChapterOutline[]>([]);
 
-  const { send, workflow } = useStoryWorkflow();
+  const { send, workflow, reset } = useStoryWorkflow();
+
+  // Extract outline data (chapter-generation)
+  const chapterGeneration = workflow?.parts.find(
+    (item) => item.type === "data-chapter-generation",
+  );
+
+  // Extract chapter content data (chapter-content-generation)
+  const chapterContents =
+    workflow?.parts
+      .filter((item) => item.type === "data-chapter-content-generation")
+      .map((item) => item.data) || [];
 
   const handleGenerate = (prompt: string, chapters: number) => {
+    send({ numberOfChapters: chapters, userPrompt: prompt });
     setStoryPrompt(prompt);
     setChapterCount(chapters);
     setAppState("outlining");
   };
 
-  const handleOutlineComplete = (generatedOutline: ChapterOutline[]) => {
-    setOutline(generatedOutline);
-    setAppState("book");
-  };
-
   const handleReset = () => {
     setAppState("input");
     setStoryPrompt("");
-    setOutline([]);
+    reset();
   };
+
+  useEffect(() => {
+    if (!chapterGeneration) return;
+
+    switch (chapterGeneration.data.status) {
+      case "streaming": {
+        setAppState("outlining");
+        break;
+      }
+      case "completed": {
+        setAppState("book");
+        break;
+      }
+    }
+  }, [chapterGeneration]);
 
   return (
     <main className="min-h-screen relative overflow-hidden">
-      {/* Decorative background pattern */}
-      <div className="fixed inset-0 opacity-[0.03] pointer-events-none">
-        <svg width="100%" height="100%">
-          <pattern
-            id="bookPattern"
-            x="0"
-            y="0"
-            width="60"
-            height="60"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M30 5 L55 15 L55 50 L30 55 L5 50 L5 15 Z"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="0.5"
-            />
-            <line
-              x1="30"
-              y1="5"
-              x2="30"
-              y2="55"
-              stroke="currentColor"
-              strokeWidth="0.5"
-            />
-          </pattern>
-          <rect width="100%" height="100%" fill="url(#bookPattern)" />
-        </svg>
-      </div>
-
       <AnimatePresence mode="wait">
         {appState === "input" && (
           <motion.div
@@ -91,7 +71,7 @@ export default function Home() {
           </motion.div>
         )}
 
-        {appState === "outlining" && (
+        {appState === "outlining" && chapterGeneration && (
           <motion.div
             key="outline"
             initial={{ opacity: 0, y: 40 }}
@@ -103,13 +83,12 @@ export default function Home() {
             <StoryOutline
               prompt={storyPrompt}
               chapterCount={chapterCount}
-              onComplete={handleOutlineComplete}
-              onBack={handleReset}
+              outline={chapterGeneration.data}
             />
           </motion.div>
         )}
 
-        {appState === "book" && (
+        {appState === "book" && chapterGeneration && (
           <motion.div
             key="book"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -120,7 +99,8 @@ export default function Home() {
           >
             <StoryBook
               prompt={storyPrompt}
-              outline={outline}
+              outline={chapterGeneration.data}
+              chapterContents={chapterContents}
               onClose={handleReset}
             />
           </motion.div>

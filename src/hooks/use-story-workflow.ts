@@ -11,7 +11,7 @@ interface SendOptions {
 }
 
 export function useStoryWorkflow() {
-  const { messages, sendMessage, status, error, stop } =
+  const { messages, sendMessage, setMessages, status, error, stop } =
     useChat<StoryWorkflowUIMessage>({
       transport: new DefaultChatTransport({
         api: "/api/story-workflow",
@@ -53,6 +53,10 @@ export function useStoryWorkflow() {
     [sendMessage],
   );
 
+  const reset = () => {
+    setMessages([]);
+  };
+
   const workflow = useMemo(() => {
     const assistantMessages = messages.filter((m) => m.role === "assistant");
     const lastAssistantMessage =
@@ -69,5 +73,6 @@ export function useStoryWorkflow() {
     error,
     stop,
     workflow,
+    reset,
   };
 }
