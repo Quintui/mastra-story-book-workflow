@@ -3,10 +3,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight, X, BookOpen } from "lucide-react";
-import {
-  ChapterGenerationEventData,
-  ChapterContentEventData,
-} from "../types/story-workflow";
+import { ChapterContentEventData } from "../types/story-workflow";
 import { paginateContent } from "../lib/paginate-content";
 
 export interface BookPage {

@@ -7,6 +7,7 @@ import {
   storyResultSchema,
   workflowInputSchema,
   workflowStateSchema,
+  ChapterGenerationEventData,
 } from "@/src/types/story-workflow";
 
 // Step 1: Generate chapter plans with titles, premises, and context
@@ -55,7 +56,7 @@ const generateChaptersStep = createStep({
         data: {
           status: "streaming",
           content: chunk,
-        },
+        } as ChapterGenerationEventData,
       });
     }
 
@@ -67,7 +68,7 @@ const generateChaptersStep = createStep({
       data: {
         status: "completed",
         content: finalObject,
-      },
+      } as ChapterGenerationEventData,
     });
 
     const storyTitle = finalObject.storyTitle || "Untitled Story";
@@ -138,14 +139,24 @@ const generateChapterContentStep = createStep({
       writer.write({
         id,
         type: "data-chapter-content-generation",
-        data: { status: "streaming", content, chapterNumber, title },
+        data: {
+          status: "streaming",
+          content,
+          chapterNumber,
+          title,
+        } as ChapterGenerationEventData,
       });
     }
 
     writer.write({
       id,
       type: "data-chapter-content-generation",
-      data: { status: "completed", content, chapterNumber, title },
+      data: {
+        status: "completed",
+        content,
+        chapterNumber,
+        title,
+      } as ChapterGenerationEventData,
     });
 
     return {
