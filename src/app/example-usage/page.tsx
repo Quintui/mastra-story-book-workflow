@@ -2,40 +2,23 @@
 
 import { useChat } from "@ai-sdk/react";
 import { useState } from "react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, UIMessage } from "ai";
+import { StoryWorkflowUIMessage } from "@/src/types/story-workflow";
+import { useStoryWorkflow } from "@/src/hooks/use-story-workflow";
 
 export default function ExampleUsage() {
   const [prompt, setPrompt] = useState("");
   const [numberOfChapters, setNumberOfChapters] = useState(3);
 
-  const { messages, sendMessage, status, error, stop } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api",
-      prepareSendMessagesRequest({ messages }) {
-        // Get the last message content as the user prompt
-        const lastMessage = messages[messages.length - 1];
-        const userPrompt =
-          lastMessage?.parts?.find((p) => p.type === "text")?.text || "";
-
-        return {
-          body: {
-            userPrompt,
-            numberOfChapters,
-          },
-        };
-      },
-    }),
-  });
+  const { send, error, status, stop, workflow } = useStoryWorkflow();
 
   const isLoading = status === "streaming" || status === "submitted";
-
-  console.log("Message", messages);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim() || isLoading) return;
 
-    sendMessage({ text: prompt });
+    send({ numberOfChapters, userPrompt: prompt });
     setPrompt("");
   };
 
@@ -101,99 +84,45 @@ export default function ExampleUsage() {
 
       {/* Messages / Workflow Output */}
       <div className="space-y-6">
-        {messages.map((message) => (
-          <div key={message.id} className="space-y-4">
-            {message.parts.map((part, index) => {
-              // Handle text parts
-              if (part.type === "text") {
-                return (
-                  <div
-                    key={`${message.id}-${index}`}
-                    className="p-4 bg-white rounded-lg border shadow-sm"
-                  >
-                    <div className="prose prose-sm max-w-none whitespace-pre-wrap">
-                      {part.text}
-                    </div>
+        <div className="space-y-4">
+          {workflow?.parts.map((part, index) => {
+            // Handle text parts
+            if (part.type === "text") {
+              return (
+                <div
+                  key={`text-${index}`}
+                  className="p-4 bg-white rounded-lg border shadow-sm"
+                >
+                  <div className="prose prose-sm max-w-none whitespace-pre-wrap">
+                    {part.text}
                   </div>
-                );
-              }
-
-              // Handle workflow data parts from @mastra/ai-sdk
-              if (part.type === "data-workflow") {
-                const workflowData = part.data as {
-                  status?: string;
-                  steps?: Array<{
-                    stepName: string;
-                    input?: unknown;
-                    output?: unknown;
-                  }>;
-                  result?: {
-                    storyTitle?: string;
-                    chapters?: Array<{
-                      chapterNumber: number;
-                      title: string;
-                      premise: string;
-                      content: string;
-                    }>;
-                    totalChapters?: number;
-                  };
-                };
-
-                return (
-                  <div key={`${message.id}-${index}`} className="space-y-4">
-                    {/* Show final result if available */}
-                    {workflowData.result?.chapters?.map((chapter) => (
-                      <article
-                        key={chapter.chapterNumber}
-                        className="p-6 bg-white rounded-lg border shadow-sm"
-                      >
-                        <h3 className="text-xl font-serif mb-1">
-                          Chapter {chapter.chapterNumber}: {chapter.title}
-                        </h3>
-                        <p className="text-sm text-gray-500 italic mb-4">
-                          {chapter.premise}
-                        </p>
-                        <div className="prose prose-sm max-w-none whitespace-pre-wrap">
-                          {chapter.content}
-                        </div>
-                      </article>
-                    ))}
-
-                    {/* Show workflow status */}
-                    {workflowData.status && !workflowData.result && (
-                      <div className="text-sm text-gray-500">
-                        Status: {workflowData.status}
-                      </div>
-                    )}
+                </div>
+              );
+            }
+            // Handle any other custom data parts (fallback)
+            if (part.type.startsWith("data-") && "data" in part) {
+              return (
+                <div
+                  key={`data-${index}`}
+                  className="p-4 bg-gray-50 rounded-lg border text-sm"
+                >
+                  <div className="font-mono text-xs text-gray-400 mb-2">
+                    {part.type}
                   </div>
-                );
-              }
+                  <pre className="overflow-auto">
+                    {JSON.stringify((part as { data: unknown }).data, null, 2)}
+                  </pre>
+                </div>
+              );
+            }
 
-              // Handle any other custom data parts
-              if (part.type.startsWith("data-")) {
-                return (
-                  <div
-                    key={`${message.id}-${index}`}
-                    className="p-4 bg-gray-50 rounded-lg border text-sm"
-                  >
-                    <div className="font-mono text-xs text-gray-400 mb-2">
-                      {part.type}
-                    </div>
-                    <pre className="overflow-auto">
-                      {JSON.stringify(part.data, null, 2)}
-                    </pre>
-                  </div>
-                );
-              }
-
-              return null;
-            })}
-          </div>
-        ))}
+            return null;
+          })}
+        </div>
       </div>
 
       {/* Loading State */}
-      {isLoading && messages.length === 0 && (
+      {isLoading && (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-500">Starting story generation...</p>

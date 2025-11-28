@@ -1,6 +1,6 @@
 import { mastra } from "@/src/mastra";
 import { createUIMessageStreamResponse } from "ai";
-import { toAISdkFormat } from "@mastra/ai-sdk";
+import { toAISdkFormat, WorkflowDataPart } from "@mastra/ai-sdk";
 
 export const POST = async (request: Request) => {
   const {
@@ -12,7 +12,7 @@ export const POST = async (request: Request) => {
 
   const run = await workflow.createRunAsync();
 
-  const stream = run.streamVNext({
+  const stream = run.stream({
     inputData: {
       storyIdea: userPrompt,
       numberOfChapters: numberOfChapters || 3,
@@ -20,6 +20,7 @@ export const POST = async (request: Request) => {
   });
 
   return createUIMessageStreamResponse({
+    // @ts-ignore
     stream: toAISdkFormat(stream, {
       from: "workflow",
     }),
