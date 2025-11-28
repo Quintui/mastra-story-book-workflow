@@ -12,17 +12,17 @@ type AppState = "input" | "outlining" | "book";
 export default function Home() {
   const [appState, setAppState] = useState<AppState>("input");
   const [storyPrompt, setStoryPrompt] = useState("");
-  const [chapterCount, setChapterCount] = useState(5);
+  const [chapterCount, setChapterCount] = useState(3);
 
   const { send, workflow, reset } = useStoryWorkflow();
 
   // Extract outline data (chapter-generation)
-  const chapterGeneration = workflow?.parts.find(
+  const chapterOutlines = workflow?.parts.find(
     (item) => item.type === "data-chapter-generation",
   );
 
   // Extract chapter content data (chapter-content-generation)
-  const chapterContents =
+  const chapters =
     workflow?.parts
       .filter((item) => item.type === "data-chapter-content-generation")
       .map((item) => item.data) || [];
@@ -41,9 +41,9 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (!chapterGeneration) return;
+    if (!chapterOutlines) return;
 
-    switch (chapterGeneration.data.status) {
+    switch (chapterOutlines.data.status) {
       case "streaming": {
         setAppState("outlining");
         break;
@@ -53,7 +53,7 @@ export default function Home() {
         break;
       }
     }
-  }, [chapterGeneration]);
+  }, [chapterOutlines]);
 
   return (
     <main className="min-h-screen relative overflow-hidden">
@@ -71,7 +71,7 @@ export default function Home() {
           </motion.div>
         )}
 
-        {appState === "outlining" && chapterGeneration && (
+        {appState === "outlining" && chapterOutlines && (
           <motion.div
             key="outline"
             initial={{ opacity: 0, y: 40 }}
@@ -83,12 +83,12 @@ export default function Home() {
             <StoryOutline
               prompt={storyPrompt}
               chapterCount={chapterCount}
-              outline={chapterGeneration.data}
+              outline={chapterOutlines.data}
             />
           </motion.div>
         )}
 
-        {appState === "book" && chapterGeneration && (
+        {appState === "book" && chapterOutlines && (
           <motion.div
             key="book"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -99,8 +99,10 @@ export default function Home() {
           >
             <StoryBook
               prompt={storyPrompt}
-              outline={chapterGeneration.data}
-              chapterContents={chapterContents}
+              chapters={chapters}
+              storyTitle={
+                chapterOutlines.data.content.storyTitle || "Your Story"
+              }
               onClose={handleReset}
             />
           </motion.div>

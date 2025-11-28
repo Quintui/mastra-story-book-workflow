@@ -58,6 +58,8 @@ export interface ChapterGenerationEventData {
 export interface ChapterContentEventData {
   status: StreamingStatus;
   content: string;
+  chapterNumber: number;
+  title: string;
 }
 
 export type StoryWorkflowUIMessage = UIMessage<

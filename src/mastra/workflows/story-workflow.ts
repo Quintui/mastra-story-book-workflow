@@ -138,14 +138,14 @@ const generateChapterContentStep = createStep({
       writer.write({
         id,
         type: "data-chapter-content-generation",
-        data: { status: "streaming", content },
+        data: { status: "streaming", content, chapterNumber, title },
       });
     }
 
     writer.write({
       id,
       type: "data-chapter-content-generation",
-      data: { status: "completed", content },
+      data: { status: "completed", content, chapterNumber, title },
     });
 
     return {

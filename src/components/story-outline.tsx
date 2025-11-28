@@ -67,182 +67,187 @@ export function StoryOutline({
         <div className="bg-[var(--book-page)] border-x-4 border-[var(--book-cover)] px-4 sm:px-8 py-8 min-h-[400px] page-texture">
           {/* Chapter list */}
           <div className="space-y-4">
-            {chapters.map((chapter, index) => (
-              <motion.div
-                key={chapter.chapterNumber}
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{
-                  duration: 0.5,
-                  ease: [0.22, 1, 0.36, 1],
-                  delay: index * 0.1,
-                }}
-                className="relative"
-              >
-                {/* Chapter card */}
-                <div
-                  className={`relative border-2 rounded-xl transition-all duration-300 overflow-hidden ${
-                    expandedChapter === chapter.chapterNumber
-                      ? "border-primary/40 bg-primary/5"
-                      : "border-primary/20 bg-card/50 hover:border-primary/30"
-                  }`}
+            {chapters.map((chapter, index) => {
+              const chapterNum = chapter.chapterNumber ?? index + 1;
+              return (
+                <motion.div
+                  key={chapterNum}
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    ease: [0.22, 1, 0.36, 1],
+                    delay: index * 0.1,
+                  }}
+                  className="relative"
                 >
-                  {/* Chapter header - always visible */}
-                  <button
-                    onClick={() => toggleExpanded(chapter.chapterNumber)}
-                    className="w-full p-4 sm:p-5 flex items-start gap-4 text-left"
+                  {/* Chapter card */}
+                  <div
+                    className={`relative border-2 rounded-xl transition-all duration-300 overflow-hidden ${
+                      expandedChapter === chapterNum
+                        ? "border-primary/40 bg-primary/5"
+                        : "border-primary/20 bg-card/50 hover:border-primary/30"
+                    }`}
                   >
-                    {/* Chapter number */}
-                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center">
-                      <span className="font-serif text-base sm:text-lg text-primary">
-                        {chapter.chapterNumber}
-                      </span>
-                    </div>
-
-                    {/* Title and premise */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-serif text-lg sm:text-xl text-foreground mb-1">
-                        {chapter.title}
-                      </h3>
-                      {chapter.premise && (
-                        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                          {chapter.premise}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Expand indicator */}
-                    <motion.div
-                      animate={{
-                        rotate:
-                          expandedChapter === chapter.chapterNumber ? 180 : 0,
-                      }}
-                      transition={{ duration: 0.2 }}
-                      className="flex-shrink-0 mt-1"
+                    {/* Chapter header - always visible */}
+                    <button
+                      onClick={() => toggleExpanded(chapterNum)}
+                      className="w-full p-4 sm:p-5 flex items-start gap-4 text-left"
                     >
-                      <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                    </motion.div>
-                  </button>
+                      {/* Chapter number */}
+                      <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center">
+                        <span className="font-serif text-base sm:text-lg text-primary">
+                          {chapterNum}
+                        </span>
+                      </div>
 
-                  {/* Expanded content */}
-                  <AnimatePresence>
-                    {expandedChapter === chapter.chapterNumber && (
+                      {/* Title and premise */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-serif text-lg sm:text-xl text-foreground mb-1">
+                          {chapter.title}
+                        </h3>
+                        {chapter.premise && (
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                            {chapter.premise}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Expand indicator */}
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        className="overflow-hidden"
+                        animate={{
+                          rotate: expandedChapter === chapterNum ? 180 : 0,
+                        }}
+                        transition={{ duration: 0.2 }}
+                        className="flex-shrink-0 mt-1"
                       >
-                        <div className="px-4 sm:px-5 pb-5 pt-0 grid gap-4 sm:grid-cols-2">
-                          {/* Characters */}
-                          {chapter.characters &&
-                            chapter.characters.length > 0 && (
+                        <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                      </motion.div>
+                    </button>
+
+                    {/* Expanded content */}
+                    <AnimatePresence>
+                      {expandedChapter === chapterNum && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{
+                            duration: 0.3,
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                          className="overflow-hidden"
+                        >
+                          <div className="px-4 sm:px-5 pb-5 pt-0 grid gap-4 sm:grid-cols-2">
+                            {/* Characters */}
+                            {chapter.characters &&
+                              chapter.characters.length > 0 && (
+                                <div className="flex gap-3">
+                                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                                    <Users className="w-4 h-4 text-amber-600" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                                      Characters
+                                    </h4>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {chapter.characters.map((char, i) => (
+                                        <span
+                                          key={i}
+                                          className="text-xs px-2 py-1 bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-full"
+                                        >
+                                          {char}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
+                            {/* Setting */}
+                            {chapter.setting && (
                               <div className="flex gap-3">
-                                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                                  <Users className="w-4 h-4 text-amber-600" />
+                                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                  <MapPin className="w-4 h-4 text-emerald-600" />
                                 </div>
                                 <div className="min-w-0">
                                   <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                                    Characters
+                                    Setting
                                   </h4>
-                                  <div className="flex flex-wrap gap-1.5">
-                                    {chapter.characters.map((char, i) => (
-                                      <span
-                                        key={i}
-                                        className="text-xs px-2 py-1 bg-amber-500/10 text-amber-700 dark:text-amber-400 rounded-full"
-                                      >
-                                        {char}
-                                      </span>
-                                    ))}
-                                  </div>
+                                  <p className="text-sm text-foreground">
+                                    {chapter.setting}
+                                  </p>
                                 </div>
                               </div>
                             )}
 
-                          {/* Setting */}
-                          {chapter.setting && (
-                            <div className="flex gap-3">
-                              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                                <MapPin className="w-4 h-4 text-emerald-600" />
-                              </div>
-                              <div className="min-w-0">
-                                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                                  Setting
-                                </h4>
-                                <p className="text-sm text-foreground">
-                                  {chapter.setting}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Emotional Tone */}
-                          {chapter.emotionalTone && (
-                            <div className="flex gap-3">
-                              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
-                                <Heart className="w-4 h-4 text-rose-600" />
-                              </div>
-                              <div className="min-w-0">
-                                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                                  Emotional Tone
-                                </h4>
-                                <p className="text-sm text-foreground">
-                                  {chapter.emotionalTone}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Story Connection */}
-                          {chapter.storyConnection && (
-                            <div className="flex gap-3">
-                              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                                <Link2 className="w-4 h-4 text-blue-600" />
-                              </div>
-                              <div className="min-w-0">
-                                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                                  Story Connection
-                                </h4>
-                                <p className="text-sm text-foreground">
-                                  {chapter.storyConnection}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Key Events - full width */}
-                          {chapter.keyEvents &&
-                            chapter.keyEvents.length > 0 && (
-                              <div className="sm:col-span-2 flex gap-3">
-                                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
-                                  <Sparkles className="w-4 h-4 text-violet-600" />
+                            {/* Emotional Tone */}
+                            {chapter.emotionalTone && (
+                              <div className="flex gap-3">
+                                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                                  <Heart className="w-4 h-4 text-rose-600" />
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                                    Key Events
+                                <div className="min-w-0">
+                                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                                    Emotional Tone
                                   </h4>
-                                  <div className="space-y-1.5">
-                                    {chapter.keyEvents.map((event, i) => (
-                                      <div
-                                        key={i}
-                                        className="flex items-center gap-2 text-sm text-foreground"
-                                      >
-                                        <span className="w-1.5 h-1.5 rounded-full bg-violet-500/60 flex-shrink-0" />
-                                        {event}
-                                      </div>
-                                    ))}
-                                  </div>
+                                  <p className="text-sm text-foreground">
+                                    {chapter.emotionalTone}
+                                  </p>
                                 </div>
                               </div>
                             )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </motion.div>
-            ))}
+
+                            {/* Story Connection */}
+                            {chapter.storyConnection && (
+                              <div className="flex gap-3">
+                                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                  <Link2 className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <div className="min-w-0">
+                                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                                    Story Connection
+                                  </h4>
+                                  <p className="text-sm text-foreground">
+                                    {chapter.storyConnection}
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Key Events - full width */}
+                            {chapter.keyEvents &&
+                              chapter.keyEvents.length > 0 && (
+                                <div className="sm:col-span-2 flex gap-3">
+                                  <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                                    <Sparkles className="w-4 h-4 text-violet-600" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
+                                      Key Events
+                                    </h4>
+                                    <div className="space-y-1.5">
+                                      {chapter.keyEvents.map((event, i) => (
+                                        <div
+                                          key={i}
+                                          className="flex items-center gap-2 text-sm text-foreground"
+                                        >
+                                          <span className="w-1.5 h-1.5 rounded-full bg-violet-500/60 flex-shrink-0" />
+                                          {event}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
 
           {/* Loading indicator while generating */}
