@@ -65,15 +65,25 @@ const generateChaptersStep = createStep({
 
     for await (const chunk of response.objectStream) {
       writer.write({
+        id: "chapter-generation",
         type: "data-chapter-generation",
         data: {
           status: "streaming",
-          chunk,
+          content: chunk,
         },
       });
     }
 
     const finalObject = await response.object;
+
+    writer.write({
+      id: "chapter-generation",
+      type: "data-chapter-generation",
+      data: {
+        status: "completed",
+        content: finalObject,
+      },
+    });
 
     const storyTitle = finalObject.storyTitle || "Untitled Story";
 
@@ -141,9 +151,12 @@ const generateChapterContentStep = createStep({
 
     let content = "";
 
+    const id = `chapter-${chapterNumber}-content`;
+
     for await (const chunk of response.textStream) {
       content += chunk;
       writer.write({
+        id,
         type: "data-chapter-content-generation",
         data: {
           status: "streaming",
@@ -151,6 +164,15 @@ const generateChapterContentStep = createStep({
         },
       });
     }
+
+    writer.write({
+      id,
+      type: "data-chapter-content-generation",
+      data: {
+        status: "completed",
+        content,
+      },
+    });
 
     return {
       chapterNumber,

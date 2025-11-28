@@ -1,6 +1,6 @@
 import { Mastra } from "@mastra/core/mastra";
-import { PinoLogger } from "@mastra/loggers";
 import { LibSQLStore } from "@mastra/libsql";
+import { workflowRoute } from "@mastra/ai-sdk";
 
 import { chapterGeneratorAgent } from "./agents/chapter-generator-agent";
 import { chapterContentAgent } from "./agents/chapter-content-agent";
@@ -13,11 +13,6 @@ export const mastra = new Mastra({
   },
   workflows: { storyWorkflow },
   storage: new LibSQLStore({
-    // stores observability, scores, ... into memory storage, if it needs to persist, change to file:../mastra.db
     url: ":memory:",
   }),
-  observability: {
-    // Enables DefaultExporter and CloudExporter for AI tracing
-    default: { enabled: true },
-  },
 });
