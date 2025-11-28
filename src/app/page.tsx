@@ -2,28 +2,47 @@
 
 import { useState } from "react";
 import { StoryInput } from "@/src/components/story-input";
+import { StoryOutline } from "@/src/components/story-outline";
 import { StoryBook } from "@/src/components/story-book";
 import { AnimatePresence, motion } from "motion/react";
+import { useStoryWorkflow } from "../hooks/use-story-workflow";
+
+export type ChapterOutline = {
+  chapterNumber: number;
+  title: string;
+  premise: string;
+  characters: string[];
+  setting: string;
+  emotionalTone: string;
+  keyEvents: string[];
+  storyConnection: string;
+};
+
+type AppState = "input" | "outlining" | "book";
 
 export default function Home() {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showBook, setShowBook] = useState(false);
+  const [appState, setAppState] = useState<AppState>("input");
   const [storyPrompt, setStoryPrompt] = useState("");
+  const [chapterCount, setChapterCount] = useState(5);
+  const [outline, setOutline] = useState<ChapterOutline[]>([]);
 
-  const handleGenerate = (prompt: string) => {
+  const { send, workflow } = useStoryWorkflow();
+
+  const handleGenerate = (prompt: string, chapters: number) => {
     setStoryPrompt(prompt);
-    setIsGenerating(true);
+    setChapterCount(chapters);
+    setAppState("outlining");
+  };
 
-    // Simulate generation delay
-    setTimeout(() => {
-      setIsGenerating(false);
-      setShowBook(true);
-    }, 2000);
+  const handleOutlineComplete = (generatedOutline: ChapterOutline[]) => {
+    setOutline(generatedOutline);
+    setAppState("book");
   };
 
   const handleReset = () => {
-    setShowBook(false);
+    setAppState("input");
     setStoryPrompt("");
+    setOutline([]);
   };
 
   return (
@@ -59,7 +78,7 @@ export default function Home() {
       </div>
 
       <AnimatePresence mode="wait">
-        {!showBook ? (
+        {appState === "input" && (
           <motion.div
             key="input"
             initial={{ opacity: 0 }}
@@ -68,12 +87,29 @@ export default function Home() {
             transition={{ duration: 0.5 }}
             className="relative z-10"
           >
-            <StoryInput
-              onGenerate={handleGenerate}
-              isGenerating={isGenerating}
+            <StoryInput onGenerate={handleGenerate} />
+          </motion.div>
+        )}
+
+        {appState === "outlining" && (
+          <motion.div
+            key="outline"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="relative z-10"
+          >
+            <StoryOutline
+              prompt={storyPrompt}
+              chapterCount={chapterCount}
+              onComplete={handleOutlineComplete}
+              onBack={handleReset}
             />
           </motion.div>
-        ) : (
+        )}
+
+        {appState === "book" && (
           <motion.div
             key="book"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -82,7 +118,11 @@ export default function Home() {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="relative z-10"
           >
-            <StoryBook prompt={storyPrompt} onClose={handleReset} />
+            <StoryBook
+              prompt={storyPrompt}
+              outline={outline}
+              onClose={handleReset}
+            />
           </motion.div>
         )}
       </AnimatePresence>
