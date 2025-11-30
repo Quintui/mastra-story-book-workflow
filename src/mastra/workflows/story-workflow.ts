@@ -18,7 +18,7 @@ const generateChaptersStep = createStep({
   inputSchema: workflowInputSchema,
   outputSchema: z.array(chapterInfoSchema),
   stateSchema: workflowStateSchema,
-  execute: async ({ inputData, mastra, setState, state, writer }) => {
+  execute: async ({ inputData, mastra, writer }) => {
     const { storyIdea, numberOfChapters } = inputData;
 
     const chapterAgent = mastra.getAgent("chapterGeneratorAgent");
@@ -71,14 +71,6 @@ const generateChaptersStep = createStep({
       } as ChapterGenerationEventData,
     });
 
-    const storyTitle = finalObject.storyTitle || "Untitled Story";
-
-    // Store storyTitle in workflow state
-    setState({
-      ...state,
-      storyTitle,
-    });
-
     return finalObject?.chapters || [];
   },
 });
@@ -103,12 +95,9 @@ const generateChapterContentStep = createStep({
       storyConnection,
     } = inputData;
 
-    // Get storyTitle from workflow state
-    const { storyTitle } = state;
-
     const contentAgent = mastra.getAgent("chapterContentAgent");
     const response = await contentAgent.stream(
-      `Write Chapter ${chapterNumber} of "${storyTitle}" with the following details:
+      `Write Chapter ${chapterNumber} with the following details:
 
 <chapter_title>${title}</chapter_title>
 
@@ -168,28 +157,6 @@ const generateChapterContentStep = createStep({
   },
 });
 
-// Step 3: Gather all chapter content into the final story
-const gatherStoryStep = createStep({
-  id: "gather-story",
-  description: "Gathers all generated chapters into a complete story",
-  inputSchema: z.array(chapterContentSchema),
-  outputSchema: storyResultSchema,
-  stateSchema: workflowStateSchema,
-  execute: async ({ inputData, state }) => {
-    const sortedChapters = [...inputData].sort(
-      (a, b) => a.chapterNumber - b.chapterNumber,
-    );
-
-    const { storyTitle } = state;
-
-    return {
-      storyTitle,
-      chapters: sortedChapters,
-      totalChapters: sortedChapters.length,
-    };
-  },
-});
-
 export const storyWorkflow = createWorkflow({
   id: "story-generation-workflow",
   description:
@@ -200,5 +167,4 @@ export const storyWorkflow = createWorkflow({
 })
   .then(generateChaptersStep)
   .foreach(generateChapterContentStep, { concurrency: 10 })
-  .then(gatherStoryStep)
   .commit();

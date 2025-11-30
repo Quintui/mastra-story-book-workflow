@@ -16,6 +16,8 @@ export default function Home() {
 
   const { send, workflow, reset } = useStoryWorkflow();
 
+  console.log("workflow", workflow);
+
   // Extract outline data (chapter-generation)
   const chapterOutlines = workflow?.parts.find(
     (item) => item.type === "data-chapter-generation",

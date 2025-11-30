@@ -1,9 +1,8 @@
-import openrouter from "@/src/lib/openroute";
 import { Agent } from "@mastra/core/agent";
 
 export const chapterContentAgent = new Agent({
   name: "chapter-content-agent",
-  model: openrouter("google/gemini-2.5-flash-lite"),
+  model: "openrouter/openai/gpt-4.1-mini",
   instructions: `You are a talented creative writer specializing in chapter writing for novels and stories.
 
 Given a chapter title, premise, and context, you write engaging, well-crafted chapter content.

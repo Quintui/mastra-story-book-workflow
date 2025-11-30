@@ -3,7 +3,7 @@ import { Agent } from "@mastra/core/agent";
 
 export const chapterGeneratorAgent = new Agent({
   name: "chapter-generator-agent",
-  model: openrouter("google/gemini-2.5-flash-lite"),
+  model: "openrouter/openai/gpt-4.1-mini",
   instructions: `You are a creative story architect specializing in chapter planning.
 When given a story theme or concept, you generate detailed chapter plans.
 

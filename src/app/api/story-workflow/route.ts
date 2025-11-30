@@ -20,7 +20,6 @@ export const POST = async (request: Request) => {
   });
 
   return createUIMessageStreamResponse({
-    // @ts-ignore
     stream: toAISdkFormat(stream, {
       from: "workflow",
     }),
