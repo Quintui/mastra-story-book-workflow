@@ -48,6 +48,8 @@ const generateChaptersStep = createStep({
         },
       },
     );
+    
+    
 
     for await (const chunk of response.objectStream) {
       writer.write({
@@ -83,7 +85,7 @@ const generateChapterContentStep = createStep({
   inputSchema: chapterInfoSchema,
   outputSchema: chapterContentSchema,
   stateSchema: workflowStateSchema,
-  execute: async ({ inputData, mastra, state, writer }) => {
+  execute: async ({ inputData, mastra, writer }) => {
     const {
       chapterNumber,
       title,
