@@ -48,30 +48,31 @@ const generateChaptersStep = createStep({
         },
       },
     );
-    
-    
 
-    for await (const chunk of response.objectStream) {
-      writer.write({
-        id: "chapter-generation",
-        type: "data-chapter-generation",
-        data: {
-          status: "streaming",
-          content: chunk,
-        } as ChapterGenerationEventData,
-      });
-    }
+    // @ts-expect-error - Type issue
+    await response.fullStream.pipeTo(writer);
 
-    const finalObject = await response.object;
+    // for await (const chunk of response.objectStream) {
+    //   writer.write({
+    //     id: "chapter-generation",
+    //     type: "data-chapter-generation",
+    //     data: {
+    //       status: "streaming",
+    //       content: chunk,
+    //     } as ChapterGenerationEventData,
+    //   });
+    // }
 
-    writer.write({
-      id: `chapter-generation`,
-      type: "data-chapter-generation",
-      data: {
-        status: "completed",
-        content: finalObject,
-      } as ChapterGenerationEventData,
-    });
+    // const finalObject = await response.object;
+
+    // writer.write({
+    //   id: `chapter-generation`,
+    //   type: "data-chapter-generation",
+    //   data: {
+    //     status: "completed",
+    //     content: finalObject,
+    //   } as ChapterGenerationEventData,
+    // });
 
     return finalObject?.chapters || [];
   },
