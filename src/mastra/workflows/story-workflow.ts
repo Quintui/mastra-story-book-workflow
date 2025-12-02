@@ -50,7 +50,7 @@ const generateChaptersStep = createStep({
     );
 
     // @ts-expect-error - Type issue
-    await response.fullStream.pipeTo(writer);
+    await response.objectStream.pipeTo(writer);
 
     // for await (const chunk of response.objectStream) {
     //   writer.write({
@@ -63,7 +63,7 @@ const generateChaptersStep = createStep({
     //   });
     // }
 
-    // const finalObject = await response.object;
+    const finalObject = await response.object;
 
     // writer.write({
     //   id: `chapter-generation`,
