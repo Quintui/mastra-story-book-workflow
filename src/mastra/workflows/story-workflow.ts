@@ -126,30 +126,33 @@ const generateChapterContentStep = createStep({
 
     const id = `chapter-${chapterNumber}-content`;
 
-    for await (const chunk of response.textStream) {
-      content += chunk;
-      writer.write({
-        id,
-        type: "data-chapter-content-generation",
-        data: {
-          status: "streaming",
-          content,
-          chapterNumber,
-          title,
-        } as ChapterGenerationEventData,
-      });
-    }
+    // @ts-expect-error - Type issue
+    response.textStream.pipeTo(writer);
 
-    writer.write({
-      id,
-      type: "data-chapter-content-generation",
-      data: {
-        status: "completed",
-        content,
-        chapterNumber,
-        title,
-      } as ChapterGenerationEventData,
-    });
+    // for await (const chunk of response.textStream) {
+    //   content += chunk;
+    //   writer.write({
+    //     id,
+    //     type: "data-chapter-content-generation",
+    //     data: {
+    //       status: "streaming",
+    //       content,
+    //       chapterNumber,
+    //       title,
+    //     } as ChapterGenerationEventData,
+    //   });
+    // }
+
+    // writer.write({
+    //   id,
+    //   type: "data-chapter-content-generation",
+    //   data: {
+    //     status: "completed",
+    //     content,
+    //     chapterNumber,
+    //     title,
+    //   } as ChapterGenerationEventData,
+    // });
 
     return {
       chapterNumber,
